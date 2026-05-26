@@ -66,6 +66,7 @@ Firmware treats platform ids as opaque strings. Adding Instagram, TikTok, X, Tel
 - Account fetch is implemented through `GET /social/{platform}/{handle}` with streaming ArduinoJson filters.
 - History fetch is implemented through `GET /history/{platform}/{handle}?range=...`, downsampling while preserving first and last points.
 - Runtime platform icons are fetched through `GET /icon/{platform}?size=48` and cached under `/icons/<platform>.png` when LittleFS has enough space.
+- YouTube and Twitch also have tiny firmware built-in icons, so the launch platforms do not depend on icon downloads. Runtime PNGs still take precedence when present.
 - Web admin at `/settings` supports refresh interval, API token, list delta range, primary account, tracked account add/delete, and a platform dropdown populated from runtime platform metadata.
 - List UI is implemented with status bar, WiFi/RSSI state, settings gear, follower rows, runtime icon/badge fallback, compact follower counts, absolute delta, sparkline, auto-scroll, tap for detail, and long-press pinning.
 - Detail UI is implemented with larger platform icon, account name, follower count, absolute range delta, area-filled smoothed history chart, `1W / 1M / 3M / 1Y / All` button matrix, and milestone progress block.

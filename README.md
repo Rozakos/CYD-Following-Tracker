@@ -67,5 +67,5 @@ Copy `src/secrets_example.h` to `src/secrets.h` and fill optional first-boot def
 
 - `LV_USE_OS` must remain `LV_OS_NONE`.
 - ST7789 `cfg.invert` must remain `false`; the flush callback swaps RGB565 bytes with `writePixels(..., true)`.
-- LittleFS is small. Runtime icons are cached opportunistically and skipped when space is low.
+- LittleFS is small. Runtime icons are cached opportunistically and skipped when space is low. YouTube and Twitch have built-in firmware fallbacks; new server-added platforms still get icons through `/icon/{platform}` when available.
 - The API base in `src/config.h` is a placeholder until the real companion service is deployed.

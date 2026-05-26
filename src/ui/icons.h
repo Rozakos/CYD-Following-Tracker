@@ -21,6 +21,8 @@ void clearRuntimeCache();
 // in the platform brand color showing the first 1-2 letters of `label`.
 // `color_hex` is the platform's server-provided "#RRGGBB" (or "" for the
 // hash fallback); `label` is the platform display name (or id).
+// Built-in launch-platform icons are used for youtube/twitch when no runtime
+// PNG has been cached yet.
 lv_obj_t* make(lv_obj_t* parent, const String& platform, const String& label,
                const String& color_hex, lv_coord_t size);
 

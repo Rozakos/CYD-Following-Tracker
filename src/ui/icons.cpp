@@ -103,6 +103,46 @@ lv_obj_t* makeBadge(lv_obj_t* parent, const String& platform,
   return badge;
 }
 
+lv_obj_t* makeBuiltinIcon(lv_obj_t* parent, const String& platform,
+                          lv_coord_t size) {
+  String id = platform;
+  id.toLowerCase();
+  if (id != "youtube" && id != "twitch") return nullptr;
+
+  lv_obj_t* icon = lv_obj_create(parent);
+  lv_obj_set_size(icon, size, size);
+  lv_obj_set_style_bg_opa(icon, LV_OPA_COVER, 0);
+  lv_obj_set_style_border_width(icon, 0, 0);
+  lv_obj_set_style_pad_all(icon, 0, 0);
+  lv_obj_clear_flag(icon, LV_OBJ_FLAG_SCROLLABLE);
+
+  if (id == "youtube") {
+    lv_obj_set_style_bg_color(icon, lv_color_hex(0xff0000), 0);
+    lv_obj_set_style_radius(icon, size / 4, 0);
+
+    lv_obj_t* play = lv_label_create(icon);
+    lv_obj_set_style_text_color(play, lv_color_hex(0xffffff), 0);
+    lv_obj_set_style_text_font(play, size >= 48 ? &lv_font_montserrat_24
+                                                : &lv_font_montserrat_18, 0);
+    lv_label_set_text(play, LV_SYMBOL_PLAY);
+    lv_obj_center(play);
+    lv_obj_add_flag(play, LV_OBJ_FLAG_EVENT_BUBBLE);
+  } else {
+    lv_obj_set_style_bg_color(icon, lv_color_hex(0x9146ff), 0);
+    lv_obj_set_style_radius(icon, size / 5, 0);
+
+    lv_obj_t* text = lv_label_create(icon);
+    lv_obj_set_style_text_color(text, lv_color_hex(0xffffff), 0);
+    lv_obj_set_style_text_font(text, size >= 48 ? &lv_font_montserrat_18
+                                                : &lv_font_montserrat_14, 0);
+    lv_label_set_text(text, "TW");
+    lv_obj_center(text);
+    lv_obj_add_flag(text, LV_OBJ_FLAG_EVENT_BUBBLE);
+  }
+
+  return icon;
+}
+
 uint32_t pngReadCb(void* userData, uint8_t* buf, uint32_t len) {
   auto* ctx = static_cast<PngDecodeCtx*>(userData);
   if (!ctx || !ctx->png) return 0;
@@ -394,6 +434,7 @@ lv_obj_t* make(lv_obj_t* parent, const String& platform, const String& label,
       return img;
     }
   }
+  if (lv_obj_t* builtin = makeBuiltinIcon(parent, platform, size)) return builtin;
   return makeBadge(parent, platform, label, color_hex, size);
 }
 
@@ -410,6 +451,10 @@ uint32_t signature(const String& platform) {
     }
   }
   if (exists) return 0x02000000u | (uint32_t)(bytes & 0x00FFFFFFu);
+  String id = platform;
+  id.toLowerCase();
+  if (id == "youtube") return 0x04000001u;
+  if (id == "twitch")  return 0x04000002u;
   return 0x03000000u;  // badge fallback
 }
 
