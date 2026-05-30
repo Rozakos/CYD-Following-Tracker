@@ -79,9 +79,12 @@ void netTask(void*) {
   bool sta_services_up = false;
   auto bringUpStaServices = [&] {
     if (sta_services_up) return;
+    // NTP first — configTime() sets the clock to UTC and resets TZ to UTC
+    // internally, so our local TZ must be applied AFTER it. (Doing it before
+    // was clobbered, leaving localtime_r on UTC.)
+    configTime(0, 0, "pool.ntp.org", "time.nist.gov");
     setenv("TZ", cfg::TIME_TZ, 1);
     tzset();
-    configTime(0, 0, "pool.ntp.org", "time.nist.gov");
     // Discover the platform set once before the first account fetch so list
     // rows render with proper names / brand colors / icons.
     fetcher::fetchPlatforms(g_settings, g_platforms);

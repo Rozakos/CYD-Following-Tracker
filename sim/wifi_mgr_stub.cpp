@@ -12,6 +12,8 @@ void retrySta(SettingsStore&) {}
 
 bool   connected() { return true; }
 bool   apActive()  { return false; }
+StaStatus   staStatus()      { return StaStatus::Connected; }
+const char* lastFailMessage(){ return "Couldn't connect"; }
 String ip()        { return String("192.168.1.50"); }
 String apSsid()    { return String("CYD-Setup-AB12"); }
 String apPass()    { return String(); }
