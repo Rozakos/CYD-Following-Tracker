@@ -10,6 +10,10 @@ set(PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/..)
 set(LIBDEPS      ${PROJECT_ROOT}/.pio/libdeps/cyd)
 
 # Pull in LVGL from the PlatformIO library cache and use the project's lv_conf.h.
+# LVGL >= 9.3's desktop CMake (env_support/cmake/os_desktop.cmake) reads
+# LV_BUILD_CONF_DIR and adds it to the lvgl target's include path so the lib
+# build finds lv_conf.h. (Older 9.2.x used a different mechanism — hence the
+# >= 9.3.0 floor in platformio.ini.)
 set(LV_BUILD_CONF_DIR ${PROJECT_ROOT}/include CACHE STRING "" FORCE)
 add_subdirectory(${LIBDEPS}/lvgl ${CMAKE_BINARY_DIR}/lvgl EXCLUDE_FROM_ALL)
 
@@ -47,6 +51,9 @@ target_compile_definitions(cyd_sim PRIVATE
 )
 
 # Order matters: the sim/compat/ shim headers must shadow Arduino-ESP32's.
+# NOTE: LovyanGFX/src is needed for <lgfx/utility/lgfx_pngle.h>. Use a TAGGED
+# LovyanGFX release (platformio.ini pins ^1.2.0) — its unreleased master ships
+# a src/lvgl.h integration shim that shadows the real <lvgl.h>.
 target_include_directories(cyd_sim PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/compat
     ${PROJECT_ROOT}/include
