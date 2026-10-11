@@ -104,6 +104,9 @@ void begin(SettingsStore* settings, PlatformStore* platforms,
     String primary = req->hasParam("primary", true)
                          ? req->getParam("primary", true)->value() : "";
     api.trim();
+    // The page never shows the token, so a blank field means "unchanged".
+    if (api.length() == 0) api = g_settings->apiKey();
+    else if (api == "-")   api = "";
     g_settings->update(api, ref.toInt(),
                        web_admin_page::accounts_csv(*g_settings),
                        primary, range);
