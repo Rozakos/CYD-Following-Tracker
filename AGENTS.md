@@ -30,7 +30,7 @@ The server is the source of truth for platforms.
 Endpoints:
 
 - `GET /platforms`
-- `GET /social/{platform}/{handle}` returns `{ "platform": "...", "handle": "...", "display_name": "...", "followers": 12345, "delta_24h": 87, "history": [12300, 12345] }`
+- `GET /social/{platform}/{handle}?range=<token>` returns `{ "platform": "...", "handle": "...", "display_name": "...", "followers": 12345, "delta_24h": 87, "history": [12300, 12345] }`; `history` spans the range (the device sends its List window), so the list delta = first->last
 - `GET /history/{platform}/{handle}?range=<token>` where token is `1w`, `1mo`, `3mo`, `1y`, or `max`
 - `GET /icon/{platform}?size=48`
 
@@ -48,6 +48,7 @@ Firmware treats platform ids as opaque strings. Adding Instagram, TikTok, X, Tel
 - `src/ui/*`: list, detail, hero, settings, WiFi setup, styles, runtime icons
 - `sim/*`: SDL/LVGL host simulator and fake data
 - `test/test_native/*`: interpolation tests
+- `server/`: the companion API (FastAPI, YouTube + Twitch + demo platforms, SQLite history, poller) with pytest tests; see `server/README.md`
 
 ## Completed So Far
 
@@ -93,18 +94,21 @@ Firmware treats platform ids as opaque strings. Adding Instagram, TikTok, X, Tel
 
 ## Not Done Yet
 
-- The real companion API is not implemented in this repo. `cfg::API_BASE` is still a placeholder for the server-side service.
-- Real YouTube and Twitch upstream fetchers are not in firmware and are still expected to live server-side behind the normalized API.
+- `server/` is implemented and tested (2026-10-11) but NOT deployed yet: it needs `server/.env` on rozakos.eu (API_SECRET, YOUTUBE_API_KEY, TWITCH_CLIENT_ID/SECRET), the systemd unit and the nginx snippet. `cfg::API_BASE` = `https://rozakos.eu/social/api/v1` (same scheme as stock-api).
+- History only exists from when the server starts tracking an account (YouTube/Twitch expose no past counts).
 - No hardware flash/run has been verified yet, so touch calibration and real ST7789 orientation should still be checked on the device.
 - Runtime icon cache has no eviction policy yet; it only skips writes when free LittleFS space is low.
 
 ## Next Work
 
-- Deploy or stub the real companion API at the configured `cfg::API_BASE`.
-- Implement real server-side YouTube and Twitch fetchers first.
+- Deploy `server/` on rozakos.eu (see server/README.md) and set the token on the device.
 - Run on hardware and tune XPT2046 calibration if touch coordinates are off.
 - Add more simulator screenshots for list/detail/hero/settings after UI changes.
 - Consider cache eviction for `/icons/*.png` if many platforms are added.
+
+## Session log
+
+- **2026-10-11 — Claude (Opus 5.5, Claude Code):** Added `server/` (companion API: YouTube Data API v3, Twitch Helix app token, demo platform with synthetic history, 10-min cache with stale fallback, SQLite history + hourly poller, drawn PNG icons; 10 pytest tests with mocked upstreams). Firmware: `/social` now sends `?range=<list window>` (the List window setting was saved but never sent, so it had no effect); settings revision counter makes the net task refetch immediately after web-admin edits instead of waiting up to the refresh interval; `API_BASE` set to `https://rozakos.eu/social/api/v1`. Verified: `pio test -e native` 5/5, `pio run -e cyd` builds, server tests 10/10, server run live in demo mode.
 
 ## CI (self-hosted Jenkins)
 

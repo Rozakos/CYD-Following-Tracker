@@ -1,0 +1,17 @@
+[Unit]
+Description=Social API (CYD follower tracker companion)
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=rozakos
+WorkingDirectory=/home/rozakos/social-api
+EnvironmentFile=/home/rozakos/social-api/.env
+ExecStart=/home/rozakos/social-api/.venv/bin/uvicorn app:app --host 127.0.0.1 --port 8002 --no-access-log
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

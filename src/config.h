@@ -9,10 +9,10 @@ namespace cfg {
 // Twitch OAuth, scraping, etc.) lives entirely on the server. Bearer-token
 // auth; a non-empty User-Agent is always sent (see API_USER_AGENT).
 //
-// TODO(api): placeholder base — replace with the real companion-API URL once
-// it exists. Every endpoint below is currently mocked in social_fetcher /
-// the simulator's fake_data. See AGENTS.md "API contract".
-inline constexpr const char* API_BASE       = "https://api.rozakos.eu/social/v1";
+// Served by server/ (FastAPI), deployed next to stock-api on rozakos.eu under
+// the same /<name>/api/v1 scheme (see server/README.md). See AGENTS.md
+// "API contract".
+inline constexpr const char* API_BASE       = "https://rozakos.eu/social/api/v1";
 inline constexpr const char* API_USER_AGENT = "CYD-Follower-Tracker/1.0 (ESP32)";
 // Eastern European time with DST: UTC+2 winter, UTC+3 summer.
 inline constexpr const char* TIME_TZ        = "EET-2EEST,M3.5.0/3,M10.5.0/4";

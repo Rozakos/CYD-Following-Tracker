@@ -59,6 +59,11 @@ class SettingsStore {
   // Captive portal saves the user's home WiFi here.
   void setWifi(const String& ssid, const String& pass);
 
+  // Bumped by update(); the network task refetches as soon as it changes, so
+  // web-admin edits (new account, list window, token) show within seconds
+  // instead of after the next refresh interval.
+  uint32_t revision() const { return _revision; }
+
  private:
   void load(const char* seedKey, const char* seedWifiSsid, const char* seedWifiPass);
   void save() const;
@@ -72,4 +77,5 @@ class SettingsStore {
   String   _listRange;
   String   _wifiSsid;
   String   _wifiPass;
+  volatile uint32_t _revision = 0;
 };

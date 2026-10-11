@@ -9,3 +9,10 @@ sim/build*/
 sim/sim_data/
 sim_data/
 .claude/
+
+# social-api
+server/.env
+server/data/
+server/.venv/
+__pycache__/
+.pytest_cache/

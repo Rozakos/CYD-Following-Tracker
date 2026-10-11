@@ -13,6 +13,7 @@ Firmware for the ESP32-2432S028R dual-USB "Cheap Yellow Display" showing social 
 - Captive WiFi setup AP with DNS hijack and OS captive-probe routes
 - Desktop simulator under `sim/` with interactive, headless PNG, and web settings HTML modes
 - Native unit test coverage for monotone interpolation
+- Companion API in `server/` (YouTube, Twitch, demo) with its own tests
 
 ## API Contract
 
@@ -23,11 +24,11 @@ All device requests use:
 - HTTP/1.0
 - `Accept-Encoding: identity`
 
-Expected companion API endpoints:
+Companion API endpoints (implemented in [`server/`](server/README.md), base `https://rozakos.eu/social/api/v1`):
 
 ```text
 GET /platforms
-GET /social/{platform}/{handle}
+GET /social/{platform}/{handle}?range=1w|1mo|3mo|1y|max
 GET /history/{platform}/{handle}?range=1w|1mo|3mo|1y|max
 GET /icon/{platform}?size=48
 ```
@@ -68,4 +69,4 @@ Copy `src/secrets_example.h` to `src/secrets.h` and fill optional first-boot def
 - `LV_USE_OS` must remain `LV_OS_NONE`.
 - ST7789 `cfg.invert` must remain `false`; the flush callback swaps RGB565 bytes with `writePixels(..., true)`.
 - LittleFS is small. Runtime icons are cached opportunistically and skipped when space is low. YouTube and Twitch have built-in firmware fallbacks; new server-added platforms still get icons through `/icon/{platform}` when available.
-- The API base in `src/config.h` is a placeholder until the real companion service is deployed.
+- The companion API lives in `server/` (FastAPI). It still has to be deployed on rozakos.eu with YouTube/Twitch keys; until then set `SOCIAL_DEMO=1` and track `demo|anything` to see the device work.

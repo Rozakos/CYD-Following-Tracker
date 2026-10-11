@@ -15,10 +15,10 @@
 #include "account_store.h"
 #include "platform_store.h"
 
-// NOTE(api): These call the documented companion-API contract (see AGENTS.md).
-// The server is currently a mock; the YouTube + Twitch fetchers live
-// server-side. On-device behaviour degrades gracefully: a failed call leaves
-// the account marked not-fresh and the UI shows "—".
+// NOTE(api): These call the companion-API contract implemented in server/
+// (see AGENTS.md); the YouTube + Twitch fetchers live there. On-device
+// behaviour degrades gracefully: a failed call leaves the account marked
+// not-fresh and the UI shows "—".
 
 namespace {
 
@@ -181,6 +181,10 @@ bool fetchAccounts(SettingsStore& settings, AccountStore& store,
   filter["delta_24h"]    = true;
   filter["history"]      = true;
 
+  // The list row's delta covers the user's "List window" (1w/1mo/...): the
+  // server returns `history` spanning that window, and the delta is first->last.
+  String range = settings.listRange();
+
   std::vector<Account> out;
   out.reserve(accts.size());
   for (const auto& ref : accts) {
@@ -188,7 +192,8 @@ bool fetchAccounts(SettingsStore& settings, AccountStore& store,
     a.platform = ref.platform;
     a.handle   = ref.handle;
 
-    String url = String(cfg::API_BASE) + "/social/" + ref.platform + "/" + ref.handle;
+    String url = String(cfg::API_BASE) + "/social/" + ref.platform + "/" + ref.handle +
+                 "?range=" + range;
     JsonDocument doc;
     if (fetchAndParse(url, token, filter, doc)) {
       a.displayName = (const char*)(doc["display_name"] | ref.handle.c_str());

@@ -238,5 +238,6 @@ void SettingsStore::update(const String& apiKey,
   _primaryKey  = primaryKey;
   if (listRange.length()) _listRange = listRange;
   save();
+  _revision = _revision + 1;
   xSemaphoreGive(_mu);
 }

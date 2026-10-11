@@ -98,6 +98,7 @@ void netTask(void*) {
   if (wifi_mgr::connected()) bringUpStaServices();
 
   uint32_t lastFetch = 0;
+  uint32_t seenRevision = g_settings.revision();
   for (;;) {
     captive_portal::loop();
 
@@ -108,6 +109,10 @@ void netTask(void*) {
       }
       bringUpStaServices();
       if (g_platforms.empty()) fetcher::fetchPlatforms(g_settings, g_platforms);
+      if (g_settings.revision() != seenRevision) {   // web admin changed something
+        seenRevision = g_settings.revision();
+        lastFetch = 0;
+      }
       if (lastFetch == 0 ||
           millis() - lastFetch > g_settings.refreshSeconds() * 1000UL) {
         if (fetcher::fetchAccounts(g_settings, g_accounts, g_platforms)) {
