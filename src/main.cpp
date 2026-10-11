@@ -11,6 +11,7 @@
 #include "display/lvgl_bridge.h"
 #include "net/account_store.h"
 #include "net/captive_portal.h"
+#include "net/mdns_svc.h"
 #include "net/platform_store.h"
 #include "net/social_fetcher.h"
 #include "net/web_admin.h"
@@ -88,7 +89,8 @@ void netTask(void*) {
     // Discover the platform set once before the first account fetch so list
     // rows render with proper names / brand colors / icons.
     fetcher::fetchPlatforms(g_settings, g_platforms);
-    web_admin::begin(&g_settings, &g_platforms);
+    web_admin::begin(&g_settings, &g_platforms, &g_accounts);
+    mdns_svc::begin();   // _rozakos._tcp for the Rozakos Home app
     xSemaphoreTake(g_lvglMu, portMAX_DELAY);
     lv_screen_load(list_screen::screen());
     xSemaphoreGive(g_lvglMu);

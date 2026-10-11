@@ -14,6 +14,8 @@ namespace cfg {
 // "API contract".
 inline constexpr const char* API_BASE       = "https://rozakos.eu/social/api/v1";
 inline constexpr const char* API_USER_AGENT = "CYD-Follower-Tracker/1.0 (ESP32)";
+// Reported to the Rozakos Home app (GET /api/device-info, mDNS TXT "fw").
+inline constexpr const char* FW_VERSION     = "1.1.0";
 // Eastern European time with DST: UTC+2 winter, UTC+3 summer.
 inline constexpr const char* TIME_TZ        = "EET-2EEST,M3.5.0/3,M10.5.0/4";
 

@@ -1,10 +1,13 @@
 #include "web_admin.h"
 
 #include <Arduino.h>
+#include <ArduinoJson.h>
 #include <ESPAsyncWebServer.h>
 
 #include "../config.h"
 #include "../settings/settings_store.h"
+#include "account_store.h"
+#include "device_identity.h"
 #include "platform_store.h"
 #include "web_admin_page.h"
 
@@ -13,6 +16,13 @@ namespace {
 AsyncWebServer g_server(80);
 SettingsStore* g_settings  = nullptr;
 PlatformStore* g_platforms = nullptr;
+AccountStore*  g_accounts  = nullptr;
+
+void send_json(AsyncWebServerRequest* req, JsonDocument& doc) {
+  String out;
+  serializeJson(doc, out);
+  req->send(200, "application/json", out);
+}
 
 void redirect_to_settings(AsyncWebServerRequest* req) {
   AsyncWebServerResponse* response = req->beginResponse(303, "text/plain", "");
@@ -30,9 +40,50 @@ void send_settings_page(AsyncWebServerRequest* req) {
 
 namespace web_admin {
 
-void begin(SettingsStore* settings, PlatformStore* platforms) {
+void begin(SettingsStore* settings, PlatformStore* platforms,
+           AccountStore* accounts) {
   g_settings  = settings;
   g_platforms = platforms;
+  g_accounts  = accounts;
+
+  // Rozakos local device protocol (identity + live state) for the Rozakos
+  // Home app; same contract as CYD-Stock-Ticker. No auth, LAN only.
+  g_server.on("/api/device-info", HTTP_GET, [](AsyncWebServerRequest* req) {
+    JsonDocument d;
+    d["id"]        = device_identity::deviceId();
+    d["name"]      = "CYD Follower Tracker";
+    d["type"]      = "cyd_follower_tracker";
+    d["fw"]        = cfg::FW_VERSION;
+    d["mac"]       = device_identity::macString();
+    d["webUiPath"] = "/settings";
+    JsonArray caps = d["capabilities"].to<JsonArray>();
+    caps.add("web_ui");
+    caps.add("settings");
+    if (g_accounts) caps.add("state");
+    send_json(req, d);
+  });
+
+  g_server.on("/api/state", HTTP_GET, [](AsyncWebServerRequest* req) {
+    JsonDocument d;
+    JsonArray arr = d["accounts"].to<JsonArray>();
+    if (g_accounts) {
+      for (const Account& a : g_accounts->snapshot()) {
+        JsonObject o = arr.add<JsonObject>();
+        o["platform"]     = a.platform;
+        o["handle"]       = a.handle;
+        o["display_name"] = a.displayName.length() ? a.displayName : a.handle;
+        if (a.fresh && a.followers >= 0) {
+          o["followers"] = a.followers;
+          o["delta"]     = a.delta;
+        } else {
+          o["followers"] = nullptr;
+        }
+      }
+      d["updated"] = (long long)g_accounts->lastUpdate();
+    }
+    d["range"] = g_settings->listRange();
+    send_json(req, d);
+  });
 
   g_server.on("/", HTTP_GET, [](AsyncWebServerRequest* req) {
     redirect_to_settings(req);
